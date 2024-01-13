@@ -22,6 +22,16 @@ func main() {
 	app := app.NewApp()
 
 	if err := app.Run(ctx); err != nil {
+		app.Close()
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+
+	// Wait for interrupt
+	<-ctx.Done()
+
+	// Clean up
+	if err := app.Close(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
