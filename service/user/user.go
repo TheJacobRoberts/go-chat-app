@@ -27,5 +27,3 @@ func (u *User) Validate() error {
 type UserService interface {
 	FindUserByID(ctx context.Context, id string) (*User, error)
 }
-
-
