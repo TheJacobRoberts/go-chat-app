@@ -26,4 +26,14 @@ func (u *User) Validate() error {
 
 type UserService interface {
 	FindUserByID(ctx context.Context, id string) (*User, error)
+	FindUsers(ctx context.Context) ([]*User, error)
+	CreateUser(ctx context.Context, user *User) error
+	UpdateUser(ctx context.Context, id int, upd UserUpdate) (*User, error)
+	DeleteUser(ctx context.Context, id int) error
+}
+
+// UserUpdate represents a set of fields to be updated via UpdateUser().
+type UserUpdate struct {
+	Name  *string `json:"name"`
+	Email *string `json:"email"`
 }

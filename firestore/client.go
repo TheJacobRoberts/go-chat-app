@@ -7,11 +7,13 @@ import (
 	firebase "firebase.google.com/go"
 )
 
-type Client struct {
+// FirestoreClient represents an internal client to interact with firestore
+type FirestoreClient struct {
 	client *firestore.Client
 }
 
-func NewClient(ctx context.Context, projectID string) (*Client, error) {
+// NewFirestoreClient returns a new instance of FirestoreClient
+func NewFirestoreClient(ctx context.Context, projectID string) (*FirestoreClient, error) {
 	conf := &firebase.Config{
 		ProjectID: projectID,
 	}
@@ -26,9 +28,9 @@ func NewClient(ctx context.Context, projectID string) (*Client, error) {
 		return nil, err
 	}
 
-	return &Client{client}, nil
+	return &FirestoreClient{client}, nil
 }
 
-func (c *Client) Close() error {
+func (c *FirestoreClient) Close() error {
 	return c.client.Close()
 }
