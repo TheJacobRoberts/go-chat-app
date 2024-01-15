@@ -37,3 +37,14 @@ type UserUpdate struct {
 	Name  *string `json:"name"`
 	Email *string `json:"email"`
 }
+
+// UserFilter represents a filter passed to FindUsers()
+type UserFilter struct {
+	// Filtering fields.
+	ID     *int    `json:"id"`
+	Email  *string `json:"email"`
+
+	// Restrict to subset of results.
+	Offset int `json:"offset"`
+	Limit  int `json:"limit"`
+}
