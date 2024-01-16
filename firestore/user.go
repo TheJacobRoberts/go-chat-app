@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"go-chat-app/service/user"
+	"go-chat-app/firestore/types"
+	"go-chat-app/service/user_service"
 	identifier "go-chat-app/util"
 
 	"cloud.google.com/go/firestore"
@@ -17,7 +18,7 @@ const (
 	_userCollection = "user"
 )
 
-var _ user.UserService = (*UserService)(nil)
+var _ user_service.UserService = (*UserService)(nil)
 
 // UserService represents a service for managing users
 type UserService struct {
@@ -32,11 +33,11 @@ func NewUserService(client *FirestoreClient) *UserService {
 }
 
 // FindUserByID retrieves a user by ID
-func (s *UserService) FindUserByID(ctx context.Context, id string) (*user.User, error) {
+func (s *UserService) FindUserByID(ctx context.Context, id string) (*user_service.User, error) {
 	userDocs := s.client.Collection(_userCollection).Where("id", "==", id)
 	iter := userDocs.Documents(ctx)
 
-	users := make([]*user.User, 0)
+	users := make([]*user_service.User, 0)
 	for {
 		doc, err := iter.Next()
 		if err == iterator.Done {
@@ -45,7 +46,7 @@ func (s *UserService) FindUserByID(ctx context.Context, id string) (*user.User, 
 		if err != nil {
 			return nil, err
 		}
-		var user user.User
+		var user user_service.User
 
 		doc.DataTo(&user)
 
@@ -56,11 +57,11 @@ func (s *UserService) FindUserByID(ctx context.Context, id string) (*user.User, 
 }
 
 // FindUserByID retrieves a user by ID
-func (s *UserService) FindUsers(ctx context.Context) ([]*user.User, error) {
+func (s *UserService) FindUsers(ctx context.Context) ([]*user_service.User, error) {
 	userDocs := s.client.Collection(_userCollection)
 	iter := userDocs.Documents(ctx)
 
-	users := make([]*user.User, 0)
+	users := make([]*user_service.User, 0)
 	for {
 		doc, err := iter.Next()
 		if err == iterator.Done {
@@ -69,7 +70,7 @@ func (s *UserService) FindUsers(ctx context.Context) ([]*user.User, error) {
 		if err != nil {
 			return nil, err
 		}
-		var user user.User
+		var user user_service.User
 
 		doc.DataTo(&user)
 
@@ -80,7 +81,7 @@ func (s *UserService) FindUsers(ctx context.Context) ([]*user.User, error) {
 }
 
 // CreateUser creates a new user
-func (s *UserService) CreateUser(ctx context.Context, user *user.User) error {
+func (s *UserService) CreateUser(ctx context.Context, user *user_service.User) error {
 	// TODO: user could possible provide a new uuid - probably need to account for this and make sure they can't
 	// TODO: doesn't matter for now as it gets overridden anyway
 	uuid := identifier.NewUUID()
@@ -97,11 +98,11 @@ func (s *UserService) CreateUser(ctx context.Context, user *user.User) error {
 }
 
 // UpdateUser updates a user
-func (s *UserService) UpdateUser(ctx context.Context, id int, upd user.UserUpdate) (*user.User, error) {
+func (s *UserService) UpdateUser(ctx context.Context, id int, upd user_service.UserUpdate) (*user_service.User, error) {
 	userDocs := s.client.Collection(_userCollection).Where("id", "==", id)
 	iter := userDocs.Documents(ctx)
 
-	users := make([]*user.User, 0)
+	users := make([]*user_service.User, 0)
 	for {
 		doc, err := iter.Next()
 		if err == iterator.Done {
@@ -110,7 +111,7 @@ func (s *UserService) UpdateUser(ctx context.Context, id int, upd user.UserUpdat
 		if err != nil {
 			return nil, err
 		}
-		var user user.User
+		var user user_service.User
 
 		doc.DataTo(&user)
 
@@ -137,77 +138,7 @@ func (s *UserService) DeleteUser(ctx context.Context, id int) error {
 	panic("unimplemented")
 }
 
-// func findUserByID(ctx context.Context, client *firestore.Client, id string) (*user.User, error) {
-// 	a, _, err := findUsers(ctx, client, &user.UserFilter{ID: &id})
-// 	if err != nil {
-// 		return nil, err
-// 	} else if len(a) == 0 {
-// 		return nil, errors.New("User not found.")
-// 	}
-// 	return a[0], nil
-// }
-
-// findUsers
-// func findUsers(ctx context.Context, client *firestore.Client, filter *user.UserFilter) (_ []*user.User, n int, err error) {
-// 	users := make([]*user.User, 0)
-
-// 	err = client.RunTransaction(ctx, func(ctx context.Context, t *firestore.Transaction) error {
-// 		colRef := client.Collection(_userCollection)
-
-// 		query := applyFilters(colRef, filter)
-
-// 		iter := query.Documents(ctx)
-
-// 		for {
-// 			doc, err := iter.Next()
-// 			if err == iterator.Done {
-// 				break
-// 			}
-// 			if err != nil {
-// 				return err
-// 			}
-// 			var user user.User
-
-// 			doc.DataTo(&user)
-
-// 			users = append(users, &user)
-// 		}
-
-// 		return nil
-// 	})
-
-// 	return users, len(users), err
-// }
-
-func updateUser(ctx context.Context, client *firestore.Client, id string, update user.UserUpdate) {
-	// Find user document
-	user, err := findUserByID(ctx, client, id)
-	if err != nil {
-		return user, err
-	}
-
-	// Update fields
-	if v := update.Name; v != nil {
-		user.Name = *v
-	}
-
-	if v := update.Email; v != nil {
-		user.Email = *v
-	}
-
-	// Set UpdatedAt to now
-	user.UpdatedAt = time.Now().UTC()
-
-	// Validation
-	if err := user.Validate(); err != nil {
-		return user, err
-	}
-
-	// Execute update on document
-	client.Collection(_userCollection)
-}
-
-func applyFilters(collection *firestore.CollectionRef, filter user.UserFilter) (query firestore.Query) {
+func applyFilters(collection *firestore.CollectionRef, filter user_service.UserFilter) (query firestore.Query) {
 	query = collection.Where("id", "==", filter.ID)
 	query = collection.Where("email", "==", filter.Email)
 	query.Limit(filter.Limit)
@@ -231,14 +162,14 @@ func applyFilters(collection *firestore.CollectionRef, filter user.UserFilter) (
 // - deleteUser
 
 // findUsers returns a list of users matching a filter, as well as a count of total matching users
-func findUsers(ctx context.Context, client *firestore.Client, filter user.UserFilter) (_ []*user.User, n int, err error) {
+func findUsers(ctx context.Context, client *firestore.Client, filter user_service.UserFilter) (_ []*types.UserDocument, n int, err error) {
 	collection := client.Collection(_userCollection)
 
 	query := applyFilters(collection, filter)
 
 	iter := query.Documents(ctx)
 
-	users := make([]*user.User, 0)
+	users := make([]*types.UserDocument, 0)
 	for {
 		doc, err := iter.Next()
 		if err == iterator.Done {
@@ -247,19 +178,19 @@ func findUsers(ctx context.Context, client *firestore.Client, filter user.UserFi
 		if err != nil {
 			return nil, 0, err
 		}
-		var user user.User
+		var user types.User
 
 		doc.DataTo(&user)
 
-		users = append(users, &user)
+		users = append(users, types.NewUserDocument(doc.Ref.ID, &user))
 	}
 
 	return users, len(users), err
 }
 
 // findUserByID fetches a user by their ID
-func findUserByID(ctx context.Context, client *firestore.Client, id string) (*user.User, error) {
-	users, _, err := findUsers(ctx, client, user.UserFilter{ID: &id})
+func findUserByID(ctx context.Context, client *firestore.Client, id string) (*types.UserDocument, error) {
+	users, _, err := findUsers(ctx, client, user_service.UserFilter{ID: &id})
 	if err != nil {
 		return nil, err
 	} else if len(users) == 0 {
@@ -269,12 +200,99 @@ func findUserByID(ctx context.Context, client *firestore.Client, id string) (*us
 }
 
 // findUserByID fetches a user by their email
-func findUserByEmail(ctx context.Context, client *firestore.Client, email string) (*user.User, error) {
-	users, _, err := findUsers(ctx, client, user.UserFilter{Email: &email})
+func findUserByEmail(ctx context.Context, client *firestore.Client, email string) (*types.UserDocument, error) {
+	users, _, err := findUsers(ctx, client, user_service.UserFilter{Email: &email})
 	if err != nil {
 		return nil, err
 	} else if len(users) == 0 {
 		return nil, errors.New("User not found")
 	}
 	return users[0], nil
+}
+
+// createUser creates a new user
+func createUser(ctx context.Context, client *firestore.Client, user *types.User) error {
+	// Validate
+	if err := user.Validate(); err != nil {
+		return err
+	}
+
+	collection := client.Collection(_userCollection)
+
+	_, _, err := collection.Add(ctx, &user_service.User{
+		ID:        identifier.NewUUID(),
+		Name:      user.Name,
+		Email:     user.Email,
+		CreatedAt: time.Now().UTC(),
+		UpdatedAt: time.Now().UTC(),
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// updateUser updates fields on a user object
+func updateUser(ctx context.Context, client *firestore.Client, id string, upd user_service.UserUpdate) (*types.User, error) {
+	userDoc, err := findUserByID(ctx, client, id)
+	if err != nil {
+		return userDoc.User, err
+	}
+
+	// Update fields
+	if v := upd.Name; v != nil {
+		userDoc.User.Name = *v
+	}
+	if v := upd.Email; v != nil {
+		userDoc.User.Email = *v
+	}
+
+	// Set UpdatedAt field
+	userDoc.User.UpdatedAt = time.Now().UTC()
+
+	// Validate
+	if err := userDoc.User.Validate(); err != nil {
+		return userDoc.User, err
+	}
+
+	collection := client.Collection(_userCollection)
+
+	doc := collection.Doc(userDoc.ID)
+
+	doc.Update(ctx, []firestore.Update{
+		{
+			Path:  "name",
+			Value: userDoc.User.Name,
+		},
+		{
+			Path:  "email",
+			Value: userDoc.User.Email,
+		},
+		{
+			Path:  "updatedAt",
+			Value: time.Now().UTC(),
+		},
+	})
+
+	if err != nil {
+		return userDoc.User, err
+	}
+
+	return userDoc.User, nil
+}
+
+// findUserByID fetches a user by their ID
+func deleteUser(ctx context.Context, client *firestore.Client, id string) error {
+	user, err := findUserByID(ctx, client, id)
+	if err != nil {
+		return err
+	}
+
+	if _, err := client.Collection(_userCollection).Doc(user.ID).Delete(ctx); err != nil {
+		return err
+	}
+
+	return nil
 }

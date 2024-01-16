@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"go-chat-app/firestore"
-	"go-chat-app/service/user"
+	"go-chat-app/service/user_service"
 )
 
 func main() {
@@ -35,7 +35,7 @@ func main() {
 		fmt.Printf("[%s] %s\n", user.ID, user.Name)
 	}
 
-	if err := userService.CreateUser(ctx, &user.User{
+	if err := userService.CreateUser(ctx, &user_service.User{
 		Name:      "Test",
 		Email:     "testing@example.com",
 		CreatedAt: time.Now().UTC().Add(-time.Minute * 60),
