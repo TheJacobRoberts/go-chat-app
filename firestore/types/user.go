@@ -1,37 +1,34 @@
 package types
 
 import (
-	"errors"
-	"time"
+	"go-chat-app/model"
 )
 
 type UserDocument struct {
 	ID   string
-	User *User
+	User *model.User
 }
 
-func NewUserDocument(id string, user *User) *UserDocument {
+func NewUserDocument(id string, user *model.User) *UserDocument {
 	return &UserDocument{
 		ID:   id,
 		User: user,
 	}
 }
 
-type User struct {
-	ID string `json:"id"`
-
-	Name  string `json:"name"`
-	Email string `json:"email"`
-
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
+// UserUpdate represents a set of fields to be updated via UpdateUser().
+type UserUpdate struct {
+	Name  *string `json:"name"`
+	Email *string `json:"email"`
 }
 
-// Validate returns an error if the user contains invalid fields
-func (u *User) Validate() error {
-	if u.Name == "" {
-		return errors.New("user name required")
-	}
+// UserFilter represents a filter passed to FindUsers()
+type UserFilter struct {
+	// Filtering fields.
+	ID    *string `json:"id"`
+	Email *string `json:"email"`
 
-	return nil
+	// Restrict to subset of results.
+	Offset int `json:"offset"`
+	Limit  int `json:"limit"`
 }

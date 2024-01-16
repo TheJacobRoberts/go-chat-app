@@ -3,6 +3,7 @@ package user_service
 import (
 	"context"
 	"errors"
+	"go-chat-app/model"
 	"time"
 )
 
@@ -26,11 +27,11 @@ func (u *User) Validate() error {
 }
 
 type UserService interface {
-	FindUserByID(ctx context.Context, id string) (*User, error)
-	FindUsers(ctx context.Context) ([]*User, error)
-	CreateUser(ctx context.Context, user *User) error
-	UpdateUser(ctx context.Context, id int, upd UserUpdate) (*User, error)
-	DeleteUser(ctx context.Context, id int) error
+	FindUserByID(ctx context.Context, string string) (*model.User, error)
+	FindUsers(ctx context.Context, filter model.UserFilter) ([]*model.User, error)
+	CreateUser(ctx context.Context, user *model.User) error
+	UpdateUser(ctx context.Context, id string, upd model.UserUpdate) (*model.User, error)
+	DeleteUser(ctx context.Context, id string) error
 }
 
 // UserUpdate represents a set of fields to be updated via UpdateUser().

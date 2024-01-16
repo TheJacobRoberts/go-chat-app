@@ -3,10 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"go-chat-app/firestore"
-	"go-chat-app/service/user_service"
+	"go-chat-app/model"
 )
 
 func main() {
@@ -20,27 +19,12 @@ func main() {
 
 	userService := firestore.NewUserService(fsClient)
 
-	u, err := userService.FindUserByID(ctx, "c91f5d35-837f-4939-bfd3-46fc1b120bb3")
+	user, err := userService.UpdateUser(ctx, "cf7f6087-4d59-43aa-914d-7ef6857c1e87", model.UserUpdate{
+		Name: &string("Jane Joy Doe"),
+	})
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Printf("[%s] %s\n", u.ID, u.Name)
-
-	users, err := userService.FindUsers(ctx)
-	if err != nil {
-		panic(err)
-	}
-	for _, user := range users {
-		fmt.Printf("[%s] %s\n", user.ID, user.Name)
-	}
-
-	if err := userService.CreateUser(ctx, &user_service.User{
-		Name:      "Test",
-		Email:     "testing@example.com",
-		CreatedAt: time.Now().UTC().Add(-time.Minute * 60),
-		UpdatedAt: time.Now().UTC().Add(-time.Minute * 59),
-	}); err != nil {
-		panic(err)
-	}
+	fmt.Println(user.String())
 }
