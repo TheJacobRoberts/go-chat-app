@@ -21,6 +21,7 @@ func (u *User) Validate() error {
 	if u.Name == "" {
 		return errors.New("user name required")
 	}
+
 	return nil
 }
 
@@ -41,8 +42,8 @@ type UserUpdate struct {
 // UserFilter represents a filter passed to FindUsers()
 type UserFilter struct {
 	// Filtering fields.
-	ID     *int    `json:"id"`
-	Email  *string `json:"email"`
+	ID    *string `json:"id"`
+	Email *string `json:"email"`
 
 	// Restrict to subset of results.
 	Offset int `json:"offset"`

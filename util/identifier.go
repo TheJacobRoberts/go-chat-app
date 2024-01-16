@@ -1,9 +1,11 @@
 package identifier
 
 import (
+	"strings"
+
 	"github.com/google/uuid"
 )
 
 func NewUUID() string {
-	return uuid.NewString()
+	return strings.ReplaceAll(uuid.NewString(), "-", "")
 }
